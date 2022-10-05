@@ -11,6 +11,8 @@ class Game:
         self.left_paddle = Paddle(20, 0)
         self.right_paddle = Paddle(constants.SCREEN_WIDTH-20-constants.PADDLE_WIDTH, 0)
         self.ball = Ball(300, 300)
+        self.left_score = 0
+        self.right_score = 0
 
         self.balls = [self.ball]
         self.paddles = [self.left_paddle, self.right_paddle]
@@ -26,6 +28,7 @@ class Game:
             if event.key == pygame.K_SPACE:
                 ball = Ball(300, 300)
                 self.balls.append(ball)
+                self.physics_objects.append(ball)
     
     def update(self):
         keys = pygame.key.get_pressed()
@@ -42,9 +45,23 @@ class Game:
             other_physics_objects = self.physics_objects.copy()
             other_physics_objects.remove(physics_object)
             physics_object.move(other_physics_objects)
- 
+
+        scored_balls = []
+
         for ball in self.balls:
-            ball.render(self.window.screen)
-           
+            if ball.is_scored():
+                scored_balls.append(ball)
+            else:
+                ball.render(self.window.screen)
+            
+        for ball in scored_balls:
+            if ball.rect.x < 0:
+                self.right_score += 1
+            else:
+                self.left_score += 1        
+            self.balls.remove(ball)
+            self.physics_objects.remove(ball)
+
+
         for paddle in self.paddles:
             paddle.render(self.window.screen)

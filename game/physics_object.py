@@ -6,6 +6,7 @@ class PhysicsObject:
         self.vel = [0, 0]
     
     def move(self, physics_objects):
+        collision = None
         self.rect.x += self.vel[0]
         for physics_object in physics_objects:
             if physics_object.rect.colliderect(self.rect):
@@ -13,6 +14,7 @@ class PhysicsObject:
                     self.rect.right = physics_object.rect.left
                 else:
                     self.rect.left = physics_object.rect.right
+                collision = {"axis": "x", "physics_object": physics_object}
                 break
         
         self.rect.y += self.vel[1]
@@ -22,4 +24,7 @@ class PhysicsObject:
                     self.rect.bottom = physics_object.rect.top
                 else:
                     self.rect.top = physics_object.rect.bottom
+                collision = {"axis": "x", "physics_object": physics_object}
                 break
+        return collision
+
