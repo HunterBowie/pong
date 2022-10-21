@@ -7,6 +7,7 @@ class Game:
         self.paddles = []
         self.balls = []
         self.items = []
+        self.collisions = []
 
         self.create_paddle("left")
         self.create_paddle("right")
@@ -53,7 +54,7 @@ class Game:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 self.create_ball()
-    
+
     def update(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:
@@ -75,7 +76,25 @@ class Game:
         
         for item in self.items:
             item["rect"].x += item["vel"][0]
+            for item2 in self.items:
+                if item2 != item:
+                    if item["rect"].colliderect(item2["rect"]):
+                        self.collisions.append({"item1": item, "item2": item2, "axis": 0})
+                        if item["vel"][0] > 0:
+                            item["rect"].right = item2["rect"].left
+                        elif item["vel"][0] < 0:
+                            item["rect"].left = item2["rect"].right
+                    
+    
             item["rect"].y += item["vel"][1]
+            for item2 in self.items:
+                if item2 != item:
+                    if item["rect"].colliderect(item2["rect"]):
+                        self.collisions.append({"item1": item, "item2": item2, "axis": 1})
+                        if item["vel"][1] > 0:
+                            item["rect"].bottom = item2["rect"].top
+                        elif item["vel"][1] < 0:
+                            item["rect"].top = item2["rect"].bottom
         
         for paddle in self.paddles:
             if paddle["rect"].top < 0:
@@ -86,32 +105,36 @@ class Game:
         reset_balls = []
         
         for ball in self.balls:
-            for item in self.items:
-                if item != ball:
-                    if ball["rect"].colliderect(item["rect"]):
-                        if item["type"] == "paddle":
-                            paddle = item
-                            if ball["vel"][0] > 0:
-                                ball["rect"].right = paddle["rect"].left
-                            else:
-                                ball["rect"].left = paddle["rect"].right
-                            
-                            # paddle isn't moving
-                            if paddle["vel"][1] == 0:
-                                ball["vel"][1] = ball["vel"][1]//2
-                            # paddle is moving
-                            else:
-                                force = constants.PADDLE_FORCE
-                                if paddle["vel"][1] < 1:
-                                    force *= -1
-                                
-                                ball["vel"][1] = paddle["vel"][1] + force
-                                
-
+            for collision in self.collisions:                    
+               if collision["item1"] == ball or collision["item2"] == ball: 
+                    item = collision["item1"]
+                    if collision["item1"] == ball:
+                        item = collision["item2"]
+                    if item["type"] == "paddle":
+                        print(ball)
+                        paddle = item                        
+                        # paddle isn't moving
+                        if paddle["vel"][1] == 0:
+                            print("not moving")
+                            ball["vel"][1] = ball["vel"][1]//2
                             ball["vel"][0] *= -1
+                        # paddle is moving
                         else:
-                            ball["vel"][0] *= -1
-                            ball["vel"][1] *= -1
+                            force = constants.PADDLE_FORCE
+                            if paddle["vel"][1] < 1:
+                                force *= -1
+                            ball["vel"][1] = paddle["vel"][1] + force
+
+                            # paddle not above or below ball
+                            if paddle["rect"].bottom != ball["rect"].top and paddle["rect"].top != ball["rect"].bottom: 
+                                print("paddle not above or below ball") 
+                                ball["vel"][0] *= -1
+                            
+                            else:
+                                print("paddle IS above or below ball")
+                    else:
+                        ball["vel"][0] *= -1
+                        ball["vel"][1] *= -1
                         
             if ball["rect"].top < 0:
                 ball["rect"].top = 0
@@ -128,6 +151,8 @@ class Game:
             if ball["rect"].right > constants.SCREEN_WIDTH:
                 self.left_score += 1
                 reset_balls.append(ball)
+            
+        self.collisions.clear()
             
         for ball in reset_balls:
             self.destroy_ball(ball)
