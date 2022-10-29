@@ -111,11 +111,9 @@ class Game:
                     if collision["item1"] == ball:
                         item = collision["item2"]
                     if item["type"] == "paddle":
-                        print(ball)
                         paddle = item                        
                         # paddle isn't moving
                         if paddle["vel"][1] == 0:
-                            print("not moving")
                             ball["vel"][1] = ball["vel"][1]//2
                             ball["vel"][0] *= -1
                         # paddle is moving
@@ -127,11 +125,8 @@ class Game:
 
                             # paddle not above or below ball
                             if paddle["rect"].bottom != ball["rect"].top and paddle["rect"].top != ball["rect"].bottom: 
-                                print("paddle not above or below ball") 
                                 ball["vel"][0] *= -1
-                            
-                            else:
-                                print("paddle IS above or below ball")
+                           
                     else:
                         ball["vel"][0] *= -1
                         ball["vel"][1] *= -1
