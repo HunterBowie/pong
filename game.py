@@ -56,6 +56,13 @@ class Game:
                 self.create_ball()
 
     def update(self):
+        if self.left_score > 10:
+            print(f"Left Paddle Wins!")
+            self.window.end()
+        if self.right_score > 10:
+            print(f"Right Paddle Wins!")
+            self.window.end()
+            
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:
             self.paddles[1]["vel"][1] = -constants.PADDLE_SPEED
